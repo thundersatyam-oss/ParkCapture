@@ -393,7 +393,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 <div class="page" id="page-processing">
   <div class="proc-icon">🌿</div>
   <div class="proc-title">Saving Entry</div>
-  <div class="proc-sub">Please wait...</div>
+  <div class="proc-sub" id="procSub">Please wait...</div>
   <div class="proc-steps">
     <div class="proc-step" id="ps0">
       <div class="proc-step-icon" id="pc0">📋</div>
@@ -412,6 +412,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
       <div class="proc-step-txt">Done</div>
     </div>
   </div>
+  <div id="debugLog" style="display:none;margin-top:24px;width:100%;max-width:340px;background:#0d1f0e;border:1px solid #2a4a2a;border-radius:12px;padding:14px;font-family:monospace;font-size:11px;color:#7cc442;line-height:1.8;white-space:pre-wrap;word-break:break-all;max-height:180px;overflow-y:auto"></div>
+  <button id="retryBtn" onclick="retrySync()" style="display:none;margin-top:16px;padding:12px 28px;background:var(--lime);color:var(--dark);border:none;border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer">↺ Retry Sync</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -636,51 +638,97 @@ async function submitEntry() {
   await runProcessing(entry);
 }
 
+let lastEntry = null;
+
 async function runProcessing(entry) {
+  lastEntry = entry;
+  const log = document.getElementById('debugLog');
+  log.style.display = 'none'; log.textContent = '';
+  document.getElementById('retryBtn').style.display = 'none';
+  document.getElementById('procSub').textContent = 'Please wait...';
+
+  function dbg(msg) {
+    console.log(msg);
+    log.style.display = 'block';
+    log.textContent += msg + '\n';
+    log.scrollTop = log.scrollHeight;
+  }
+
+  dbg('▶ ' + entry.id + ' — ' + new Date().toLocaleTimeString());
+  dbg('URL: .../' + SCRIPT_URL.split('/').slice(-2).join('/'));
+
   // Step 0 — prepare
   await step(0, 'done');
 
   // Step 1 — save to sheet
   await step(1, 'running');
+  entry.sheetSaved = false;
   try {
+    dbg('→ Sending to Google Sheet...');
     await postToScript({ type: 'park_entry', ...entry });
     entry.sheetSaved = true;
-  } catch(e) { console.log('Sheet error:', e); }
+    dbg('✅ Sent! (Check sheet for new row)');
+  } catch(e) {
+    dbg('❌ Failed: ' + e.message);
+  }
   await step(1, 'done');
 
-  // Step 2 — upload photos
+  // Step 2 — photos
   await step(2, 'running');
   let uploaded = 0;
-  for (let i = 0; i < photos.length; i++) {
-    document.getElementById('ps2txt').textContent = `Uploading photo ${i+1}/${photos.length}`;
-    try {
-      const compressed = await compressImage(photos[i].dataUrl, 1024, 0.75);
-      await postToScript({
-        type:   'park_photo',
-        entryId: entry.id,
-        dataUrl: compressed,
-        label:  `photo_${i+1}`,
-        index:  i
-      });
-      uploaded++;
-    } catch(e) { console.log('Photo error:', e); }
+  if (!photos.length) {
+    dbg('ℹ️ No photos'); document.getElementById('ps2txt').textContent = 'No photos';
   }
-  document.getElementById('ps2txt').textContent =
-    photos.length ? `${uploaded}/${photos.length} photos uploaded` : 'No photos';
+  for (let i = 0; i < photos.length; i++) {
+    document.getElementById('ps2txt').textContent = `Photo ${i+1}/${photos.length}`;
+    try {
+      const c = await compressImage(photos[i].dataUrl, 1024, 0.75);
+      dbg(`→ Photo ${i+1} (${Math.round(c.length/1024)}KB)...`);
+      await postToScript({ type:'park_photo', entryId:entry.id, dataUrl:c, label:`photo_${i+1}`, index:i });
+      uploaded++; dbg(`✅ Photo ${i+1} sent`);
+    } catch(e) { dbg(`❌ Photo ${i+1}: ` + e.message); }
+  }
+  if (photos.length) document.getElementById('ps2txt').textContent = `${uploaded}/${photos.length} uploaded`;
   await step(2, 'done');
 
-  // Step 3 — finish
+  // Step 3 — done
   await step(3, 'done');
 
-  // Save locally
+  // Always save locally
   entries = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
-  entries.push(entry);
+  const idx = entries.findIndex(e => e.id === entry.id);
+  if (idx >= 0) entries[idx] = entry; else entries.push(entry);
   localStorage.setItem(STORE_KEY, JSON.stringify(entries));
 
-  await delay(700);
-  showToast(entry.sheetSaved ? `✅ ${entry.id} saved to Sheet!` : `⚠️ ${entry.id} saved locally`);
+  if (!entry.sheetSaved) {
+    document.getElementById('procSub').textContent = 'Saved locally — sheet may have failed';
+    document.getElementById('retryBtn').style.display = 'block';
+  }
+
+  await delay(600);
+  showToast(entry.sheetSaved ? `✅ ${entry.id} saved to Sheet!` : `📱 ${entry.id} local only`);
   showPage('page-dashboard');
   loadDashboard();
+}
+
+async function retrySync() {
+  if (!lastEntry) return;
+  const log = document.getElementById('debugLog');
+  document.getElementById('retryBtn').style.display = 'none';
+  log.textContent += '\n↺ Retrying...\n';
+  try {
+    await postToScript({ type: 'park_entry', ...lastEntry });
+    lastEntry.sheetSaved = true;
+    entries = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+    const i = entries.findIndex(e => e.id === lastEntry.id);
+    if (i >= 0) entries[i].sheetSaved = true;
+    localStorage.setItem(STORE_KEY, JSON.stringify(entries));
+    log.textContent += '✅ Retry sent — check your sheet!';
+    showToast('✅ Retry sent — check sheet!');
+  } catch(e) {
+    log.textContent += '❌ Still failing: ' + e.message;
+    document.getElementById('retryBtn').style.display = 'block';
+  }
 }
 
 async function step(n, state) {
@@ -697,7 +745,7 @@ async function step(n, state) {
 }
 
 // ══════════════════════════════════════════
-//  APPS SCRIPT POST (no-cors)
+//  APPS SCRIPT POST (no-cors — always reaches Google)
 // ══════════════════════════════════════════
 function postToScript(payload) {
   return fetch(SCRIPT_URL, {
