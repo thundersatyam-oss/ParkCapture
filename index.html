@@ -243,6 +243,38 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { display: inline-block; animation: spin .8s linear infinite; }
 
+/* ══ TOGGLE CHECKBOXES ══ */
+.toggle-opt {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--cream); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 10px 12px;
+  font-size: 12px; font-weight: 500; color: var(--dark);
+  cursor: pointer; transition: border-color .2s, background .2s;
+  user-select: none;
+}
+.toggle-opt input[type=checkbox] { accent-color: var(--green); width: 16px; height: 16px; flex-shrink: 0; }
+.toggle-opt:has(input:checked) { border-color: var(--lime); background: #f0faeb; }
+.amenity-row { display: flex; align-items: center; gap: 8px; }
+.amenity-count {
+  width: 80px; padding: 10px 10px; flex-shrink: 0;
+  background: var(--cream); border: 1.5px solid var(--lime);
+  border-radius: 10px; color: var(--dark);
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  outline: none; text-align: center;
+}
+
+/* select styling */
+.form-field select {
+  width: 100%; padding: 11px 13px;
+  background: var(--cream); border: 1.5px solid var(--border);
+  border-radius: 10px; color: var(--dark);
+  font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none;
+  appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7e6b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  padding-right: 36px;
+}
+.form-field select:focus { border-color: var(--green); background-color: var(--white); }
+
 /* ══ TOAST ══ */
 .toast {
   position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -306,20 +338,62 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
   <button class="fab" onclick="startNewEntry()">+</button>
 </div>
 
+<!-- ══ CATEGORY SELECT ══ -->
+<div class="page" id="page-category">
+  <div class="form-header">
+    <button class="back-btn" onclick="showPage('page-dashboard');loadDashboard()">←</button>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:16px">
+    <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">What are you capturing?</div>
+    <button onclick="selectCategory('park')" style="width:100%;max-width:340px;padding:24px 20px;background:var(--white);border:2px solid var(--border);border-radius:20px;cursor:pointer;text-align:left;transition:border-color .2s" onmouseover="this.style.borderColor='var(--lime)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:36px;margin-bottom:8px">🌳</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--dark)">Park</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">Benches, rides, pathway, boundary, amenities</div>
+    </button>
+    <button onclick="selectCategory('watertank')" style="width:100%;max-width:340px;padding:24px 20px;background:var(--white);border:2px solid var(--border);border-radius:20px;cursor:pointer;text-align:left;transition:border-color .2s" onmouseover="this.style.borderColor='var(--lime)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:36px;margin-bottom:8px">💧</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--dark)">Water Tank</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">Capacity, motor, boundary, solar lights</div>
+    </button>
+  </div>
+</div>
+
 <!-- ══ FORM ══ -->
 <div class="page" id="page-form">
   <div class="form-header">
     <button class="back-btn" onclick="goBack()">←</button>
     <div class="form-header-info">
-      <div class="form-header-title">New Entry</div>
+      <div class="form-header-title" id="formTitle">New Entry</div>
       <div class="form-header-sub" id="formIdLabel">Generating ID...</div>
     </div>
   </div>
   <div class="form-body">
 
-    <!-- Location -->
+    <!-- ── COMMON FIELDS ── -->
     <div class="form-section">
-      <div class="form-section-title">📍 Location</div>
+      <div class="form-section-title" id="formSectionIcon">📋 Basic Info</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>S.No *</label>
+          <input type="text" id="fSno" placeholder="e.g. 001">
+        </div>
+        <div class="form-field">
+          <label>Ward No *</label>
+          <input type="text" id="fWardNo" placeholder="e.g. 005">
+        </div>
+      </div>
+      <div class="form-field">
+        <label id="fNameLabel">Park Name *</label>
+        <input type="text" id="fName" placeholder="e.g. Nehru Park">
+      </div>
+      <div class="form-field">
+        <label>Moholla Name</label>
+        <input type="text" id="fMoholla" placeholder="e.g. Rajendra Nagar">
+      </div>
+      <div class="form-field">
+        <label>Address</label>
+        <input type="text" id="fAddress" placeholder="Full address">
+      </div>
       <div class="form-field">
         <label>GPS Coordinates</label>
         <input type="text" id="fGps" readonly placeholder="Acquiring...">
@@ -328,48 +402,222 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
           <span id="gpsStatusTxt" style="color:var(--muted);font-size:12px">Acquiring GPS...</span>
         </div>
       </div>
-      <div class="form-field">
-        <label>Moholla Name *</label>
-        <input type="text" id="fMoholla" placeholder="e.g. Rajendra Nagar">
-      </div>
-      <div class="form-field">
-        <label>Address</label>
-        <input type="text" id="fAddress" placeholder="Full address">
-      </div>
     </div>
 
-    <!-- Park Details -->
-    <div class="form-section">
-      <div class="form-section-title">🌳 Park Details</div>
-      <div class="form-field">
-        <label>Park Name *</label>
-        <input type="text" id="fParkName" placeholder="e.g. Nehru Park">
-      </div>
-      <div class="form-field">
-        <label>V Code</label>
-        <input type="text" id="fVCode" placeholder="e.g. V-042">
-      </div>
-      <div class="form-row">
-        <div class="form-field">
-          <label>Benches</label>
-          <input type="number" id="fBenches" placeholder="0" min="0">
-        </div>
-        <div class="form-field">
-          <label>Seats</label>
-          <input type="number" id="fSeats" placeholder="0" min="0">
-        </div>
-      </div>
-      <div class="form-field">
-        <label>Total Area (sq ft / sq m)</label>
-        <input type="text" id="fArea" placeholder="e.g. 2400 sq ft">
-      </div>
-      <div class="form-field">
-        <label>Remarks</label>
-        <textarea id="fRemarks" placeholder="Any additional observations..."></textarea>
-      </div>
-    </div>
+    <!-- ── PARK FIELDS ── -->
+    <div id="parkFields">
 
-    <!-- Photos -->
+      <div class="form-section">
+        <div class="form-section-title">🌳 Park Details</div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Benches</label>
+            <input type="text" id="fBenches" placeholder="0">
+          </div>
+          <div class="form-field">
+            <label>Seats</label>
+            <input type="text" id="fSeats" placeholder="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Rides</label>
+            <input type="text" id="fRides" placeholder="0">
+          </div>
+          <div class="form-field">
+            <label>Total Area</label>
+            <input type="text" id="fArea" placeholder="e.g. 2400 sqft">
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Pathway</label>
+          <select id="fPathway">
+            <option value="">-- Select --</option>
+            <option>Interlocking Tiles</option>
+            <option>Stone</option>
+            <option>None</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Road</label>
+          <select id="fRoad">
+            <option value="">-- Select --</option>
+            <option>All Side</option>
+            <option>2 Side</option>
+            <option>3 Side</option>
+            <option>1 Side</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Road Dimensions (L × B)</label>
+          <input type="text" id="fRoadDim" placeholder="e.g. 120m × 8m">
+        </div>
+        <div class="form-field">
+          <label>Boundary Wall</label>
+          <select id="fBoundary">
+            <option value="">-- Select --</option>
+            <option>MS Grill</option>
+            <option>Brick Wall</option>
+            <option>MS Grill + Brick Wall</option>
+            <option>None</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Boundary Wall Dimensions (L × B)</label>
+          <input type="text" id="fBoundaryDim" placeholder="e.g. 80m × 2m">
+        </div>
+        <div class="form-field">
+          <label>Circle Rate</label>
+          <input type="text" id="fCircleRate" placeholder="e.g. ₹5000/sqft">
+        </div>
+        <div class="form-field">
+          <label>Remarks</label>
+          <textarea id="fRemarks" placeholder="Any additional observations..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">⚙️ Amenities</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+
+          <div class="amenity-row">
+            <label class="toggle-opt" style="flex:1">
+              <input type="checkbox" id="fDrinkingWater" onchange="toggleCount('cDrinkingWater',this)"> 💧 Drinking Water Tab
+            </label>
+            <input type="number" id="cDrinkingWater" class="amenity-count" placeholder="Count" min="1" style="display:none">
+          </div>
+
+          <div class="amenity-row">
+            <label class="toggle-opt" style="flex:1">
+              <input type="checkbox" id="fSolarLights" onchange="toggleCount('cSolarLights',this)"> ☀️ Solar Lights
+            </label>
+            <input type="number" id="cSolarLights" class="amenity-count" placeholder="Count" min="1" style="display:none">
+          </div>
+
+          <div class="amenity-row">
+            <label class="toggle-opt" style="flex:1">
+              <input type="checkbox" id="fToilet" onchange="toggleCount('cToilet',this)"> 🚻 Toilet
+            </label>
+            <input type="number" id="cToilet" class="amenity-count" placeholder="Count" min="1" style="display:none">
+          </div>
+
+          <div class="amenity-row">
+            <label class="toggle-opt" style="flex:1">
+              <input type="checkbox" id="fGate" onchange="toggleCount('cGate',this)"> 🚪 Entry/Exit Gate
+            </label>
+            <input type="number" id="cGate" class="amenity-count" placeholder="Count" min="1" style="display:none">
+          </div>
+
+          <div class="amenity-row">
+            <label class="toggle-opt" style="flex:1">
+              <input type="checkbox" id="fFountain" onchange="toggleCount('cFountain',this)"> ⛲ Fountains
+            </label>
+            <input type="number" id="cFountain" class="amenity-count" placeholder="Count" min="1" style="display:none">
+          </div>
+
+          <div class="amenity-row">
+            <label class="toggle-opt" style="flex:1">
+              <input type="checkbox" id="fComposit" onchange="toggleCount('cComposit',this)"> 🌿 Composit
+            </label>
+            <input type="number" id="cComposit" class="amenity-count" placeholder="Count" min="1" style="display:none">
+          </div>
+
+          <div class="amenity-row">
+            <label class="toggle-opt" style="flex:1">
+              <input type="checkbox" id="fTubeWell" onchange="toggleCount('cTubeWell',this)"> 🕳️ Tube Well
+            </label>
+            <input type="number" id="cTubeWell" class="amenity-count" placeholder="Count" min="1" style="display:none">
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- end parkFields -->
+
+    <!-- ── WATER TANK FIELDS ── -->
+    <div id="tankFields" style="display:none">
+
+      <div class="form-section">
+        <div class="form-section-title">💧 Water Tank Details</div>
+        <div class="form-field">
+          <label>Water Capacity</label>
+          <input type="text" id="fWaterCapacity" placeholder="e.g. 50,000 litres">
+        </div>
+        <div class="form-field">
+          <label>Area</label>
+          <input type="text" id="fTankArea" placeholder="e.g. 500 sqft">
+        </div>
+        <div class="form-field">
+          <label>Pathway</label>
+          <select id="fTankPathway">
+            <option value="">-- Select --</option>
+            <option>Interlocking Tiles</option>
+            <option>Stone</option>
+            <option>None</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Road Dimensions (L × B)</label>
+          <input type="text" id="fTankRoadDim" placeholder="e.g. 80m × 6m">
+        </div>
+        <div class="form-field">
+          <label>Boundary Wall</label>
+          <select id="fTankBoundary">
+            <option value="">-- Select --</option>
+            <option>MS Grill</option>
+            <option>Brick Wall</option>
+            <option>MS Grill + Brick Wall</option>
+            <option>None</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Boundary Wall Dimensions (L × B)</label>
+          <input type="text" id="fTankBoundaryDim" placeholder="e.g. 40m × 2m">
+        </div>
+        <div class="form-field">
+          <label>Circle Rate</label>
+          <input type="text" id="fTankCircleRate" placeholder="e.g. ₹5000/sqft">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">⚙️ Amenities</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+
+          <div class="amenity-row">
+            <label class="toggle-opt" style="flex:1">
+              <input type="checkbox" id="fTankDrinkingWater" onchange="toggleCount('cTankDrinkingWater',this)"> 💧 Drinking Water Tab
+            </label>
+            <input type="number" id="cTankDrinkingWater" class="amenity-count" placeholder="Count" min="1" style="display:none">
+          </div>
+
+          <div class="amenity-row">
+            <label class="toggle-opt" style="flex:1">
+              <input type="checkbox" id="fTankSolarLights" onchange="toggleCount('cTankSolarLights',this)"> ☀️ Solar Lights
+            </label>
+            <input type="number" id="cTankSolarLights" class="amenity-count" placeholder="Count" min="1" style="display:none">
+          </div>
+
+          <div class="amenity-row">
+            <label class="toggle-opt" style="flex:1">
+              <input type="checkbox" id="fTankGate" onchange="toggleCount('cTankGate',this)"> 🚪 Entry/Exit Gate
+            </label>
+            <input type="number" id="cTankGate" class="amenity-count" placeholder="Count" min="1" style="display:none">
+          </div>
+
+          <div class="amenity-row">
+            <label class="toggle-opt" style="flex:1">
+              <input type="checkbox" id="fTankMotor" onchange="toggleCount('cTankMotor',this)"> ⚡ Electric Motor
+            </label>
+            <input type="number" id="cTankMotor" class="amenity-count" placeholder="Count" min="1" style="display:none">
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- end tankFields -->
+
+    <!-- ── PHOTOS (both) ── -->
     <div class="form-section">
       <div class="form-section-title">📷 Photos</div>
       <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
@@ -487,7 +735,7 @@ function loadDashboard() {
 function renderEntries() {
   const el = document.getElementById('entriesList');
   if (!entries.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🌳</div><div class="empty-txt">No entries yet.<br>Tap + to capture a park.</div></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🌳</div><div class="empty-txt">No entries yet.<br>Tap + to capture.</div></div>`;
     return;
   }
   const sorted = [...entries].reverse();
@@ -497,45 +745,77 @@ function renderEntries() {
         <span class="ec-id">${e.id}</span>
         <span class="ec-date">${e.submittedAt ? e.submittedAt.split('T')[0] : '—'}</span>
       </div>
-      <div class="ec-name">${e.parkName || 'Unnamed Park'}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:${e.category==='Park'?'#e8f5e0':'#e0f0fa'};color:${e.category==='Park'?'#1b5e34':'#1a4a6e'}">${e.category==='Park'?'🌳':'💧'} ${e.category||'Park'}</span>
+        <div class="ec-name" style="margin:0">${e.name || 'Unnamed'}</div>
+      </div>
       <div class="ec-meta">
-        <span class="ec-chip">📍 ${e.moholla || '—'}</span>
-        ${e.vCode ? `<span class="ec-chip">🏷️ ${e.vCode}</span>` : ''}
-        ${e.benches ? `<span class="ec-chip">🪑 ${e.benches} benches</span>` : ''}
+        ${e.wardNo ? `<span class="ec-chip">Ward ${e.wardNo.replace("'","")}</span>` : ''}
+        ${e.moholla ? `<span class="ec-chip">📍 ${e.moholla}</span>` : ''}
         ${e.area ? `<span class="ec-chip">📐 ${e.area}</span>` : ''}
-        <span class="ec-chip">${e.sheetSaved ? '☁️ Synced' : '📱 Local'}</span>
         ${e.photoCount ? `<span class="ec-chip">📷 ${e.photoCount}</span>` : ''}
+        <span class="ec-chip">${e.sheetSaved ? '☁️ Synced' : '📱 Local'}</span>
       </div>
     </div>`).join('');
 }
 
 // ══════════════════════════════════════════
-//  NEW ENTRY FORM
+//  CATEGORY + FORM
 // ══════════════════════════════════════════
+let currentCategory = 'park'; // 'park' | 'watertank'
+
 function startNewEntry() {
+  showPage('page-category');
+}
+
+function selectCategory(cat) {
+  currentCategory = cat;
   photos = [];
   document.getElementById('photoGrid').innerHTML = '';
   document.getElementById('photoCountBadge').textContent = '';
 
-  // Reset fields
-  ['fGps','fMoholla','fAddress','fParkName','fVCode','fBenches','fSeats','fArea','fRemarks']
-    .forEach(id => document.getElementById(id).value = '');
+  // Reset all inputs
+  document.querySelectorAll('#page-form input:not([type=file]):not([type=checkbox]), #page-form textarea, #page-form select')
+    .forEach(el => el.value = '');
+  document.querySelectorAll('#page-form input[type=checkbox]').forEach(el => el.checked = false);
+  document.querySelectorAll('.amenity-count').forEach(el => { el.value = ''; el.style.display = 'none'; });
 
   // Generate ID
   const counter = parseInt(localStorage.getItem(COUNTER_KEY) || '0') + 1;
   localStorage.setItem(COUNTER_KEY, counter);
-  const newId = 'PKR-' + String(counter).padStart(4, '0');
+  const newId = (cat === 'park' ? 'PKR-' : 'WTK-') + String(counter).padStart(4, '0');
   document.getElementById('formIdLabel').textContent = newId;
+
+  // Show/hide fields
+  if (cat === 'park') {
+    document.getElementById('formTitle').textContent = '🌳 Park Entry';
+    document.getElementById('formSectionIcon').textContent = '🌳 Basic Info';
+    document.getElementById('fNameLabel').textContent = 'Park Name *';
+    document.getElementById('fName').placeholder = 'e.g. Nehru Park';
+    document.getElementById('parkFields').style.display = 'block';
+    document.getElementById('tankFields').style.display = 'none';
+  } else {
+    document.getElementById('formTitle').textContent = '💧 Water Tank Entry';
+    document.getElementById('formSectionIcon').textContent = '💧 Basic Info';
+    document.getElementById('fNameLabel').textContent = 'Water Tank Name *';
+    document.getElementById('fName').placeholder = 'e.g. Sector 4 Water Tank';
+    document.getElementById('parkFields').style.display = 'none';
+    document.getElementById('tankFields').style.display = 'block';
+  }
 
   showPage('page-form');
   acquireGPS();
 }
 
 function goBack() {
-  if (confirm('Discard this entry?')) {
-    showPage('page-dashboard');
-    loadDashboard();
+  // Check if any meaningful data has been entered
+  const hasData = ['fName','fMoholla','fAddress','fBenches','fSeats','fRides','fArea','fRemarks','fWaterCapacity']
+    .some(id => (document.getElementById(id)?.value || '').trim() !== '');
+
+  if (hasData) {
+    if (!confirm('Discard this entry?')) return;
   }
+  showPage('page-category');
 }
 
 // GPS
@@ -609,30 +889,82 @@ function removePhoto(i) {
 // ══════════════════════════════════════════
 //  SUBMIT
 // ══════════════════════════════════════════
+function toggleCount(countId, checkbox) {
+  const el = document.getElementById(countId);
+  if (el) el.style.display = checkbox.checked ? 'block' : 'none';
+  if (!checkbox.checked && el) el.value = '';
+}
+
+function chk(id)      { return document.getElementById(id)?.checked ? 'Yes' : 'No'; }
+function chkCount(checkId, countId) {
+  const checked = document.getElementById(checkId)?.checked;
+  if (!checked) return 'No';
+  const count = (document.getElementById(countId)?.value || '').trim();
+  return count ? `Yes (${count})` : 'Yes';
+}
+function val(id) { return (document.getElementById(id)?.value || '').trim(); }
+
 async function submitEntry() {
-  const moholla  = document.getElementById('fMoholla').value.trim();
-  const parkName = document.getElementById('fParkName').value.trim();
-  if (!moholla)  { showToast('⚠️ Moholla name is required'); return; }
-  if (!parkName) { showToast('⚠️ Park name is required'); return; }
+  const name   = val('fName');
+  const wardNo = val('fWardNo');
+  const sno    = val('fSno');
+  if (!name)   { showToast('⚠️ Name is required'); return; }
+  if (!wardNo) { showToast('⚠️ Ward No is required'); return; }
 
   const id = document.getElementById('formIdLabel').textContent;
 
-  const entry = {
+  // Ward No preserved as text (keeps leading zeros e.g. 005)
+  let entry = {
     id,
+    category:    currentCategory === 'park' ? 'Park' : 'Water Tank',
     capturedBy:  currentUser.name,
-    gps:         document.getElementById('fGps').value,
-    moholla,
-    address:     document.getElementById('fAddress').value.trim(),
-    parkName,
-    vCode:       document.getElementById('fVCode').value.trim(),
-    benches:     document.getElementById('fBenches').value || '0',
-    seats:       document.getElementById('fSeats').value || '0',
-    area:        document.getElementById('fArea').value.trim(),
-    remarks:     document.getElementById('fRemarks').value.trim(),
+    sno:         "'" + sno,       // apostrophe prefix forces text in sheet
+    wardNo:      "'" + wardNo,    // preserves 005 as 005 not 5
+    name,
+    moholla:     val('fMoholla'),
+    address:     val('fAddress'),
+    gps:         val('fGps'),
     photoCount:  photos.length,
     submittedAt: new Date().toISOString(),
     sheetSaved:  false
   };
+
+  if (currentCategory === 'park') {
+    Object.assign(entry, {
+      benches:      val('fBenches') || '0',
+      seats:        val('fSeats') || '0',
+      rides:        val('fRides') || '0',
+      area:         val('fArea'),
+      pathway:      val('fPathway'),
+      road:         val('fRoad'),
+      roadDim:      val('fRoadDim'),
+      boundary:     val('fBoundary'),
+      boundaryDim:  val('fBoundaryDim'),
+      circleRate:   val('fCircleRate'),
+      remarks:      val('fRemarks'),
+      drinkingWater: chkCount('fDrinkingWater', 'cDrinkingWater'),
+      solarLights:   chkCount('fSolarLights',   'cSolarLights'),
+      toilet:        chkCount('fToilet',         'cToilet'),
+      gate:          chkCount('fGate',           'cGate'),
+      fountain:      chkCount('fFountain',       'cFountain'),
+      composit:      chkCount('fComposit',       'cComposit'),
+      tubeWell:      chkCount('fTubeWell',       'cTubeWell'),
+    });
+  } else {
+    Object.assign(entry, {
+      waterCapacity: val('fWaterCapacity'),
+      area:          val('fTankArea'),
+      pathway:       val('fTankPathway'),
+      roadDim:       val('fTankRoadDim'),
+      boundary:      val('fTankBoundary'),
+      boundaryDim:   val('fTankBoundaryDim'),
+      circleRate:    val('fTankCircleRate'),
+      drinkingWater: chkCount('fTankDrinkingWater', 'cTankDrinkingWater'),
+      solarLights:   chkCount('fTankSolarLights',   'cTankSolarLights'),
+      gate:          chkCount('fTankGate',           'cTankGate'),
+      electricMotor: chkCount('fTankMotor',          'cTankMotor'),
+    });
+  }
 
   showPage('page-processing');
   await runProcessing(entry);
