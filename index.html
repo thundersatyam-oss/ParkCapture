@@ -355,6 +355,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
       <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--dark)">Water Tank</div>
       <div style="font-size:13px;color:var(--muted);margin-top:4px">Capacity, motor, boundary, solar lights</div>
     </button>
+    <button onclick="selectCategory('toilet')" style="width:100%;max-width:340px;padding:24px 20px;background:var(--white);border:2px solid var(--border);border-radius:20px;cursor:pointer;text-align:left;transition:border-color .2s" onmouseover="this.style.borderColor='var(--lime)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:36px;margin-bottom:8px">🚻</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--dark)">Toilet</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">Type, area, water tank, remarks</div>
+    </button>
   </div>
 </div>
 
@@ -617,6 +622,39 @@ body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(
 
     </div><!-- end tankFields -->
 
+    <!-- ── TOILET FIELDS ── -->
+    <div id="toiletFields" style="display:none">
+      <div class="form-section">
+        <div class="form-section-title">🚻 Toilet Details</div>
+        <div class="form-field">
+          <label>Type</label>
+          <select id="fToiletType">
+            <option value="">-- Select --</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Both Male &amp; Female</option>
+            <option>Common</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Area</label>
+          <input type="text" id="fToiletArea" placeholder="e.g. 200 sqft">
+        </div>
+        <div class="form-field">
+          <label>Water Tank</label>
+          <select id="fToiletWaterTank">
+            <option value="">-- Select --</option>
+            <option>Available</option>
+            <option>Not Available</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Remarks</label>
+          <textarea id="fToiletRemarks" placeholder="Any observations..."></textarea>
+        </div>
+      </div>
+    </div><!-- end toiletFields -->
+
     <!-- ── PHOTOS (both) ── -->
     <div class="form-section">
       <div class="form-section-title">📷 Photos</div>
@@ -746,7 +784,7 @@ function renderEntries() {
         <span class="ec-date">${e.submittedAt ? e.submittedAt.split('T')[0] : '—'}</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:${e.category==='Park'?'#e8f5e0':'#e0f0fa'};color:${e.category==='Park'?'#1b5e34':'#1a4a6e'}">${e.category==='Park'?'🌳':'💧'} ${e.category||'Park'}</span>
+        <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:${e.category==='Park'?'#e8f5e0':e.category==='Toilet'?'#fde8f0':'#e0f0fa'};color:${e.category==='Park'?'#1b5e34':e.category==='Toilet'?'#8b1a4a':'#1a4a6e'}">${e.category==='Park'?'🌳':e.category==='Toilet'?'🚻':'💧'} ${e.category||'Park'}</span>
         <div class="ec-name" style="margin:0">${e.name || 'Unnamed'}</div>
       </div>
       <div class="ec-meta">
@@ -783,24 +821,32 @@ function selectCategory(cat) {
   // Generate ID
   const counter = parseInt(localStorage.getItem(COUNTER_KEY) || '0') + 1;
   localStorage.setItem(COUNTER_KEY, counter);
-  const newId = (cat === 'park' ? 'PKR-' : 'WTK-') + String(counter).padStart(4, '0');
+  const newId = (cat === 'park' ? 'PKR-' : cat === 'watertank' ? 'WTK-' : 'TLT-') + String(counter).padStart(4, '0');
   document.getElementById('formIdLabel').textContent = newId;
 
   // Show/hide fields
+  document.getElementById('parkFields').style.display   = 'none';
+  document.getElementById('tankFields').style.display   = 'none';
+  document.getElementById('toiletFields').style.display = 'none';
+
   if (cat === 'park') {
     document.getElementById('formTitle').textContent = '🌳 Park Entry';
     document.getElementById('formSectionIcon').textContent = '🌳 Basic Info';
     document.getElementById('fNameLabel').textContent = 'Park Name *';
     document.getElementById('fName').placeholder = 'e.g. Nehru Park';
     document.getElementById('parkFields').style.display = 'block';
-    document.getElementById('tankFields').style.display = 'none';
-  } else {
+  } else if (cat === 'watertank') {
     document.getElementById('formTitle').textContent = '💧 Water Tank Entry';
     document.getElementById('formSectionIcon').textContent = '💧 Basic Info';
     document.getElementById('fNameLabel').textContent = 'Water Tank Name *';
     document.getElementById('fName').placeholder = 'e.g. Sector 4 Water Tank';
-    document.getElementById('parkFields').style.display = 'none';
     document.getElementById('tankFields').style.display = 'block';
+  } else {
+    document.getElementById('formTitle').textContent = '🚻 Toilet Entry';
+    document.getElementById('formSectionIcon').textContent = '🚻 Basic Info';
+    document.getElementById('fNameLabel').textContent = 'Toilet Name *';
+    document.getElementById('fName').placeholder = 'e.g. Sector 5 Public Toilet';
+    document.getElementById('toiletFields').style.display = 'block';
   }
 
   showPage('page-form');
@@ -809,7 +855,7 @@ function selectCategory(cat) {
 
 function goBack() {
   // Check if any meaningful data has been entered
-  const hasData = ['fName','fMoholla','fAddress','fBenches','fSeats','fRides','fArea','fRemarks','fWaterCapacity']
+  const hasData = ['fName','fMoholla','fAddress','fBenches','fSeats','fRides','fArea','fRemarks','fWaterCapacity','fToiletArea','fToiletRemarks']
     .some(id => (document.getElementById(id)?.value || '').trim() !== '');
 
   if (hasData) {
@@ -916,10 +962,10 @@ async function submitEntry() {
   // Ward No preserved as text (keeps leading zeros e.g. 005)
   let entry = {
     id,
-    category:    currentCategory === 'park' ? 'Park' : 'Water Tank',
+    category:    currentCategory === 'park' ? 'Park' : currentCategory === 'watertank' ? 'Water Tank' : 'Toilet',
     capturedBy:  currentUser.name,
-    sno:         "'" + sno,       // apostrophe prefix forces text in sheet
-    wardNo:      "'" + wardNo,    // preserves 005 as 005 not 5
+    sno:         "'" + sno,
+    wardNo:      "'" + wardNo,
     name,
     moholla:     val('fMoholla'),
     address:     val('fAddress'),
@@ -950,7 +996,7 @@ async function submitEntry() {
       composit:      chkCount('fComposit',       'cComposit'),
       tubeWell:      chkCount('fTubeWell',       'cTubeWell'),
     });
-  } else {
+  } else if (currentCategory === 'watertank') {
     Object.assign(entry, {
       waterCapacity: val('fWaterCapacity'),
       area:          val('fTankArea'),
@@ -963,6 +1009,13 @@ async function submitEntry() {
       solarLights:   chkCount('fTankSolarLights',   'cTankSolarLights'),
       gate:          chkCount('fTankGate',           'cTankGate'),
       electricMotor: chkCount('fTankMotor',          'cTankMotor'),
+    });
+  } else {
+    Object.assign(entry, {
+      toiletType:   val('fToiletType'),
+      area:         val('fToiletArea'),
+      waterTank:    val('fToiletWaterTank'),
+      remarks:      val('fToiletRemarks'),
     });
   }
 
